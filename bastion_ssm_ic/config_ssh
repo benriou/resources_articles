@@ -1,0 +1,42 @@
+#######################################################
+# ~/.ssh/config demo file
+# This is a reference file for the Adevinta Blog Article 
+# on Bastion SSM
+#####################################################
+# All accounts
+host bastion-ssm-ic
+    user ec2-user
+    identityfile /tmp/ssm_ic
+    UserKnownHostsFile=/dev/null
+    StrictHostKeyChecking=no
+    ProxyCommand sh -c "~/.ssh/ssm-ic.sh bastion || true"
+
+# SSH over Session Manager
+host i-* mi-*
+    ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
+
+#Other networks (SSH tunnelling)
+host 10.1.0.*
+    user ec2-user
+    proxycommand ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q bastion-ssm-ic -W %h:%p
+
+#blue production server proxy (SSH tunnelling)
+host internal-production-blue-server 
+    user ec2-user
+    identityfile ~/.ssh/blue-production-server.pem
+    proxycommand ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q bastion-ssm-ic -W $(aws ec2 describe-instances --filters Name=tag:Name,Values=internal-production-blue-server | jq -r '.Reservations[0].Instances[] | select(.State.Name == "running") | .PrivateIpAddress'):%p
+#
+#Blue Production proxy access (SSH tunnelling to 10.1.1.1)
+host internal-production-blue-server-pre
+    user ec2-user
+    identityfile ~/.ssh/blue-server-pre.pem
+    proxycommand ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q bastion-ssm-ic -W 10.1.1.1:%p
+
+#PostGres Proxy (TCP non-secure tunneling)
+Host rds-blue-database-bastion-ssm-ic-pre
+  User ec2-user
+  UserKnownHostsFile=/dev/null
+  ProxyCommand sh -c "~/.ssh/ssm-ic.sh bastion || true"
+  LocalForward 5432 rds-blue-database.crvmei3oe.eu-west-1.rds.amazonaws.com:5432
+  IdentityFile /tmp/ssm_ic
+
