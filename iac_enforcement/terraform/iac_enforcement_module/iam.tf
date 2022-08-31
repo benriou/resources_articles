@@ -1,5 +1,5 @@
 resource "aws_iam_role" "cloudtrail_role" {
-  name = "cloudtrail-iac-enforcement"
+  name = "cloudtrail-iac-enforcement-${data.aws_region.current.name}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

@@ -1,0 +1,19 @@
+[[source]]
+url = "https://artifactory.mpi-internal.com/artifactory/api/pypi/pypi-virtual/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+boto3 = "*"
+botocore = "*"
+jmespath = "*"
+python-dateutil = "*"
+s3transfer = "*"
+six = "*"
+urllib3 = "*"
+
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
