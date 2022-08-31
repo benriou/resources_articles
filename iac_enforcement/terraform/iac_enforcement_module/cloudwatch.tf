@@ -8,11 +8,17 @@ resource "aws_cloudwatch_log_metric_filter" "manual_changes" {
   pattern = replace(<<EOT
 {
 ($.userIdentity.sessionContext.sessionIssuer.userName = "${var.monitored_role}" ) &&
+($.userAgent != "*Confidence*") &&
 ($.userAgent != "*Terraform*") &&
 ($.userAgent != "*ssm-agent*") &&
 ($.eventName != "AssumeRole") &&
 ($.eventName != "StartQuery") &&
 ($.eventName != "ConsoleLogin") &&
+($.eventName != "StartSession") &&
+($.eventName != "CreateSession") &&
+($.eventName != "ResumeSession") &&
+($.eventName != "SendSSHPublicKey") &&
+($.eventName != "PutCredentials") &&
 ($.managementEvent is true) &&
 ($.readOnly is false)
 }
@@ -61,10 +67,16 @@ resource "aws_cloudwatch_dashboard" "iac_enforcement" {
                   SOURCE 'iac-enforcement' | fields @timestamp, userIdentity.principalId, eventName, @message
                   | sort @timestamp desc
                   | filter userIdentity.sessionContext.sessionIssuer.userName like /${var.monitored_role}/
+                  | filter userAgent not like /Confidence/
                   | filter userAgent not like /Terraform/
                   | filter userAgent not like /ssm-agent/
                   | filter eventName not like /AssumeRole/
                   | filter eventName not like /ConsoleLogin/
+                  | filter eventName not like /StartSession/
+                  | filter eventName not like /CreateSession/
+                  | filter eventName not like /ResumeSession/
+                  | filter eventName not like /SendSSHPublicKey/
+                  | filter eventName not like /PutCredentials/
                   | filter eventName not like /StartQuery/
                   | filter managementEvent = 1
                   | filter readOnly = 0

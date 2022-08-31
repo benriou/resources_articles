@@ -1,7 +1,7 @@
 ### Bucket S3 linked to the CloudTrail
 
 resource "aws_s3_bucket" "this" {
-  bucket        = "cloudtrail-iac-enforcement-${data.aws_caller_identity.current.account_id}"
+  bucket        = "cloudtrail-iac-enforcement-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}"
   force_destroy = true
 }
 
