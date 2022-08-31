@@ -7,3 +7,8 @@ variable "monitored_role" {
   description = "Role to Monitor"
   type        = string
 }
+
+variable "sns_email_subscription" {
+  description = "Destination Emails for SNS topic"
+  type        = string
+}
